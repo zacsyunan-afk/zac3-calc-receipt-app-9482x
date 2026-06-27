@@ -2,10 +2,10 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>レシートスキャンシステム</title>
+  <title>レシートスキャンシステム（特殊レシート用）</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* カメラのガイド枠アニメーション */
+    /* カメラのガイド枠アニメーション（4:3用に調整） */
     .scanner-laser {
       background: linear-gradient(to bottom, rgba(59, 130, 246, 0) 0%, rgba(59, 130, 246, 1) 50%, rgba(59, 130, 246, 0) 100%);
       animation: scan 2.5s linear infinite;
@@ -19,7 +19,7 @@
 </head>
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col justify-between">
 
-  <!-- 📱 メインコンテンツ（アクセスと同時に直接表示されます） -->
+  <!-- 📱 メインコンテンツ -->
   <div id="main-app-content" class="flex flex-col justify-between min-h-screen">
     <!-- ヘッダー -->
     <header class="bg-blue-600 text-white shadow-md p-4 text-center">
@@ -27,24 +27,24 @@
     </header>
 
     <!-- メインコンテンツ -->
-    <main class="flex-grow p-3 max-w-lg mx-auto w-full space-y-4">
+    <main class="flex-grow p-3 max-w-xl mx-auto w-full space-y-4">
       
       <!-- カメラセクション -->
       <section id="camera-section" class="bg-white rounded-2xl shadow-sm overflow-hidden p-2 border border-gray-100">
-        <!-- 画面に大きく収まる 9:16 の大型ファインダー -->
-        <div class="relative bg-black rounded-xl aspect-[9/16] overflow-hidden flex items-center justify-center">
+        <!-- 🎥 比率を縦60×横80に合わせて aspect-[4/3]（横長）に最適化 -->
+        <div class="relative bg-black rounded-xl aspect-[4/3] overflow-hidden flex items-center justify-center">
           <video id="video" autoplay playsinline class="w-full h-full object-cover"></video>
           <canvas id="canvas" class="hidden"></canvas>
           
-          <!-- スキャンガイド枠（レシートが収まりやすい縦長仕様） -->
-          <div class="absolute inset-x-6 inset-y-12 border-2 border-blue-400 rounded-lg pointer-events-none opacity-70">
+          <!-- スキャンガイド枠（縦の多少の前後にも対応できるよう上下に少し余裕を持たせています） -->
+          <div class="absolute inset-x-8 inset-y-6 border-2 border-blue-400 rounded-lg pointer-events-none opacity-70">
             <div class="scanner-laser absolute left-0 w-full h-1 opacity-90"></div>
           </div>
         </div>
         
         <!-- 押しやすい大型シャッターボタン -->
-        <div class="mt-3 flex justify-center px-2">
-          <button id="snap-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition transform active:scale-95 text-lg">
+        <div class="mt-3 flex justify-center px-1">
+          <button id="snap-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition transform active:scale-95 text-lg tracking-wide">
             📸 レシートを撮影して計算
           </button>
         </div>
@@ -110,7 +110,7 @@
     // ⚙️ 【設定エリア】環境に合わせて必ずここを書き換えてください
     // =================================================================
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbyr4S_xFRVTtDBIO4seokuuG2Z_hEoTSqxPyOo0c6jBcFxy8JbBhWqXPy2PWxRztNk4/exec'; 
-    const SECRET_TOKEN = 'your_super_secret_password_1234'; // GASのCode.gsと「全く同じ」合言葉
+    const SECRET_TOKEN = 'your_super_secret_password_1234'; 
     // =================================================================
 
     const video = document.getElementById('video');
@@ -122,14 +122,14 @@
     
     let currentParsedData = null;
 
-    // 1. カメラの初期化（前面に邪魔な親iframeがないため高精細かつ確実に動作します）
+    // 1. カメラの初期化（4:3のレシート形状を最も高解像度で捉えられるように調整）
     async function initCamera() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { 
             facingMode: 'environment', 
-            width: { ideal: 1920 }, 
-            height: { ideal: 1080 } 
+            width: { ideal: 1600 }, 
+            height: { ideal: 1200 } 
           },
           audio: false
         });
@@ -223,7 +223,6 @@
       } catch (err) { console.error("履歴の同期に失敗しました:", err); }
     }
 
-    // 起動時にダイレクトに初期化を走らせます
     window.onload = () => {
       initCamera();
       updateSummary();
