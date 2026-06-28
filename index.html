@@ -18,97 +18,109 @@
 </head>
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col justify-between">
 
-  <div id="main-app-content" class="flex flex-col justify-between min-h-screen">
-    <header class="bg-blue-600 text-white shadow-md p-4 text-center">
-      <h1 class="text-xl font-bold tracking-wider">景品レシート自動計算システム0124</h1>
+  <div id="main-app-content" class="flex flex-col justify-between min-h-screen w-full">
+    <header class="bg-blue-600 text-white shadow-md p-4 text-center w-full">
+      <h1 class="text-xl font-bold tracking-wider">景品レシート自動計算システム0139</h1>
     </header>
 
-    <main class="flex-grow p-3 max-w-xl mx-auto w-full space-y-4">
+    <main class="flex-grow p-4 w-full grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
       
-      <section id="camera-section" class="bg-white rounded-2xl shadow-sm overflow-hidden p-2 border border-gray-100">
-        <div class="relative bg-black rounded-xl aspect-[4/3] overflow-hidden flex items-center justify-center">
-          <video id="video" autoplay playsinline muted class="w-full h-full object-cover"></video>
-          <canvas id="canvas" class="hidden"></canvas>
-          <div class="absolute inset-x-8 inset-y-6 border-2 border-blue-400 rounded-lg pointer-events-none opacity-70">
-            <div class="scanner-laser absolute left-0 w-full h-1 opacity-90"></div>
+      <div class="lg:col-span-7 space-y-4 w-full">
+        <section id="camera-section" class="bg-white rounded-2xl shadow-sm overflow-hidden p-3 border border-gray-100">
+          <div class="relative bg-black rounded-xl aspect-[4/3] overflow-hidden flex items-center justify-center max-w-3xl mx-auto">
+            <video id="video" autoplay playsinline muted class="w-full h-full object-cover"></video>
+            <canvas id="canvas" class="hidden"></canvas>
+            <div class="absolute inset-x-8 inset-y-6 border-2 border-blue-400 rounded-lg pointer-events-none opacity-70">
+              <div class="scanner-laser absolute left-0 w-full h-1 opacity-90"></div>
+            </div>
           </div>
-        </div>
-        <div class="mt-3 flex justify-center px-1">
-          <button id="snap-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition transform active:scale-95 text-lg tracking-wide">
-            📸 レシートを撮影して計算
-          </button>
-        </div>
-      </section>
+          <div class="mt-3 flex justify-center px-1 max-w-3xl mx-auto">
+            <button id="snap-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition transform active:scale-95 text-lg tracking-wide">
+              📸 レシートを撮影して計算
+            </button>
+          </div>
+        </section>
 
-      <div id="loading" class="hidden text-center p-8 bg-white rounded-2xl shadow-sm border">
-        <div class="animate-spin inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mb-2"></div>
-        <p class="text-gray-500 font-medium">Cloud Vision APIで文字解析中...</p>
+        <div id="loading" class="hidden text-center p-8 bg-white rounded-2xl shadow-sm border">
+          <div class="animate-spin inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mb-2"></div>
+          <p class="text-gray-500 font-medium">Cloud Vision APIで文字解析中...</p>
+        </div>
+
+        <section id="result-section" class="hidden bg-white rounded-2xl shadow-lg border-2 border-blue-500 p-5 space-y-4">
+          
+          <div id="duplicate-warning" class="hidden bg-red-100 border-2 border-red-500 text-red-700 p-4 rounded-xl flex flex-col items-center space-y-1 text-center animate-bounce">
+            <span class="text-2xl">⚠️ 🚨 重複エラー 🚨 ⚠️</span>
+            <p class="font-black text-sm">このレシート（No: <span id="warn-num"></span>）は、本日すでに読み込み・DB保存が完了しています！二重払いに注意してください。</p>
+          </div>
+
+          <div class="flex justify-between items-center border-b pb-2">
+            <h2 class="text-lg font-bold text-gray-700" id="result-title">読み取り結果（1枚目）</h2>
+            <span class="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded" id="res-date-now"></span>
+          </div>
+
+          <div id="combined-list-area" class="hidden bg-blue-50 p-3 rounded-xl border border-blue-200 text-xs text-blue-900 space-y-1">
+            <span class="font-bold block text-[11px] uppercase text-blue-700">現在合算中のレシート:</span>
+            <div id="combined-items-tags" class="flex flex-wrap gap-1.5 pt-1"></div>
+          </div>
+
+          <table class="w-full text-left border-collapse text-sm">
+            <thead>
+              <tr class="border-b text-gray-400">
+                <th class="py-1">景品種別</th>
+                <th class="py-1 text-center w-24">合算個数</th>
+                <th class="py-1 text-right">金額</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y">
+              <tr>
+                <td class="py-2 font-medium">特殊景品（大）</td>
+                <td class="text-center py-1">
+                  <span id="count-l-view" class="font-bold text-lg">0</span>
+                  <input type="number" id="count-l-edit" min="0" max="99" class="hidden w-20 text-center border rounded p-1 font-bold">
+                </td>
+                <td id="price-l" class="text-right font-medium text-gray-600">¥0</td>
+              </tr>
+              <tr>
+                <td class="py-2 font-medium">特殊景品（中）</td>
+                <td class="text-center py-1">
+                  <span id="count-m-view" class="font-bold text-lg">0</span>
+                  <input type="number" id="count-m-edit" min="0" max="99" class="hidden w-20 text-center border rounded p-1 font-bold">
+                </td>
+                <td id="price-m" class="text-right font-medium text-gray-600">¥0</td>
+              </tr>
+              <tr>
+                <td class="py-2 font-medium">特殊景品（小）</td>
+                <td class="text-center py-1">
+                  <span id="count-s-view" class="font-bold text-lg">0</span>
+                  <input type="number" id="count-s-edit" min="0" max="99" class="hidden w-20 text-center border rounded p-1 font-bold">
+                </td>
+                <td id="price-s" class="text-right font-medium text-gray-600">¥0</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="text-right">
+            <button id="edit-toggle-btn" class="text-xs bg-gray-100 text-blue-600 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-blue-50 font-medium transition">✏️ 数量を手動修正する</button>
+          </div>
+
+          <div class="bg-blue-600 p-4 rounded-xl flex justify-between items-center text-white shadow-sm">
+            <span class="font-bold" id="total-label">現在までの合算合計金額</span>
+            <span id="total-amount" class="text-2xl font-black">¥0</span>
+          </div>
+
+          <div class="space-y-2 pt-2">
+            <div class="flex space-x-2">
+              <button id="cancel-btn" class="w-1/3 border border-gray-300 text-gray-600 py-3 rounded-xl font-medium active:bg-gray-100 text-sm">クリア</button>
+              <button id="next-scan-btn" class="w-2/3 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl font-bold shadow-md active:scale-95 transition text-sm">➕ 次のレシートを追加撮影</button>
+            </div>
+            <button id="save-btn" class="w-full bg-green-600 hover:bg-green-700 text-white py-3.5 rounded-xl font-black text-lg shadow-lg active:scale-95 transition disabled:opacity-30 disabled:pointer-events-none">💰 合算金額を確定して保存</button>
+          </div>
+        </section>
       </div>
 
-      <section id="result-section" class="hidden bg-white rounded-2xl shadow-lg border-2 border-blue-500 p-5 space-y-4">
-        
-        <div id="duplicate-warning" class="hidden bg-red-100 border-2 border-red-500 text-red-700 p-4 rounded-xl flex flex-col items-center space-y-1 text-center animate-bounce">
-          <span class="text-2xl">⚠️ 🚨 重複エラー 🚨 ⚠️</span>
-          <p class="font-black text-sm">このレシート（No: <span id="warn-num"></span>）は、本日すでに読み込み・DB保存が完了しています！二重払いに注意してください。</p>
-        </div>
-
-        <div class="flex justify-between items-center border-b pb-2">
-          <h2 class="text-lg font-bold text-gray-700" id="result-title">読み取り結果（1枚目）</h2>
-          <span class="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded" id="res-date-now"></span>
-        </div>
-
-        <div id="combined-list-area" class="hidden bg-blue-50 p-3 rounded-xl border border-blue-200 text-xs text-blue-900 space-y-1">
-          <span class="font-bold block text-[11px] uppercase text-blue-700">現在合算中のレシート:</span>
-          <div id="combined-items-tags" class="flex flex-wrap gap-1.5 pt-1"></div>
-        </div>
-
-        <table class="w-full text-left border-collapse text-sm">
-          <thead>
-            <tr class="border-b text-gray-400">
-              <th class="py-1">景品種別</th>
-              <th class="py-1 text-center w-24">合算個数</th>
-              <th class="py-1 text-right">金額</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y">
-            <tr>
-              <td class="py-2 font-medium">特殊景品（大）</td>
-              <td class="text-center py-1">
-                <span id="count-l-view" class="font-bold text-lg">0</span>
-                <input type="number" id="count-l-edit" min="0" max="99" class="hidden w-20 text-center border rounded p-1 font-bold">
-              </td>
-              <td id="price-l" class="text-right font-medium text-gray-600">¥0</td>
-            </tr>
-            <tr>
-              <td class="py-2 font-medium">特殊景品（中）</td>
-              <td class="text-center py-1">
-                <span id="count-m-view" class="font-bold text-lg">0</span>
-                <input type="number" id="count-m-edit" min="0" max="99" class="hidden w-20 text-center border rounded p-1 font-bold">
-              </td>
-              <td id="price-m" class="text-right font-medium text-gray-600">¥0</td>
-            </tr>
-            <tr>
-              <td class="py-2 font-medium">特殊景品（小）</td>
-              <td class="text-center py-1">
-                <span id="count-s-view" class="font-bold text-lg">0</span>
-                <input type="number" id="count-s-edit" min="0" max="99" class="hidden w-20 text-center border rounded p-1 font-bold">
-              </td>
-              <td id="price-s" class="text-right font-medium text-gray-600">¥0</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div class="text-right">
-          <button id="edit-toggle-btn" class="text-xs bg-gray-100 text-blue-600 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-blue-50 font-medium transition">✏️ 数量を手動修正する</button>
-        </div>
-
-        <div class="bg-blue-600 p-4 rounded-xl flex justify-between items-center text-white shadow-sm">
-          <span class="font-bold" id="total-label">現在までの合算合計金額</span>
-          <span id="total-amount" class="text-2xl font-black">¥0</span>
-        </div>
-
-        <div class="border border-gray-200 rounded-xl overflow-hidden shadow-inner">
-          <div class="bg-gray-100 px-4 py-2 text-xs font-bold text-gray-500 tracking-wider">払い出し金種内訳（縦並び）</div>
+      <div class="lg:col-span-5 space-y-4 w-full">
+        <div class="border border-gray-200 bg-white rounded-2xl overflow-hidden shadow-sm">
+          <div class="bg-gray-100 px-4 py-2.5 text-xs font-bold text-gray-500 tracking-wider">払い出し金種内訳</div>
           <div class="divide-y divide-gray-200 bg-white">
             <div class="flex justify-between items-center px-5 py-3"><span class="text-base font-bold text-gray-500">1万円札</span><span id="denom-10k" class="text-xl font-black text-gray-800">0 枚</span></div>
             <div class="flex justify-between items-center px-5 py-3"><span class="text-base font-bold text-gray-500">5千円札</span><span id="denom-5k" class="text-xl font-black text-gray-800">0 枚</span></div>
@@ -118,38 +130,30 @@
           </div>
         </div>
 
-        <div class="space-y-2 pt-2">
-          <div class="flex space-x-2">
-            <button id="cancel-btn" class="w-1/3 border border-gray-300 text-gray-600 py-3 rounded-xl font-medium active:bg-gray-100 text-sm">クリア</button>
-            <button id="next-scan-btn" class="w-2/3 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl font-bold shadow-md active:scale-95 transition text-sm">➕ 次のレシートを追加撮影</button>
+        <section class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-2xl shadow-md p-5 flex justify-between items-center">
+          <div>
+            <h3 class="text-xs font-bold tracking-wider text-blue-100 uppercase">本日撮影分の総合計</h3>
+            <p class="text-xs text-blue-200 mt-0.5" id="today-date-label">----/--/--</p>
           </div>
-          <button id="save-btn" class="w-full bg-green-600 hover:bg-green-700 text-white py-3.5 rounded-xl font-black text-lg shadow-lg active:scale-95 transition disabled:opacity-30 disabled:pointer-events-none">💰 合算金額を確定して保存</button>
-        </div>
-      </section>
+          <div class="text-right">
+            <span id="today-grand-total" class="text-3xl font-black tracking-wide">¥0</span>
+          </div>
+        </section>
 
-      <section class="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 space-y-3">
-        <div class="flex justify-between items-center">
-          <h3 class="font-bold text-gray-700 text-sm">直近のレシート履歴（当日撮影分・最大5件）</h3>
-          <button onclick="updateSummary()" class="text-xs text-blue-600 hover:underline">同期・更新</button>
-        </div>
-        <div id="summary-list" class="max-h-60 overflow-y-auto space-y-2 text-xs divide-y">
-          <p class="text-gray-400 text-center py-4">履歴はありません</p>
-        </div>
-      </section>
-
-      <section class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-2xl shadow-md p-5 flex justify-between items-center">
-        <div>
-          <h3 class="text-xs font-bold tracking-wider text-blue-100 uppercase">本日撮影分の総合計</h3>
-          <p class="text-xs text-blue-200 mt-0.5" id="today-date-label">----/--/--</p>
-        </div>
-        <div class="text-right">
-          <span id="today-grand-total" class="text-3xl font-black tracking-wide">¥0</span>
-        </div>
-      </section>
+        <section class="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 space-y-3">
+          <div class="flex justify-between items-center">
+            <h3 class="font-bold text-gray-700 text-sm">直近のレシート履歴（当日撮影分・最大5件）</h3>
+            <button onclick="updateSummary()" class="text-xs text-blue-600 hover:underline">同期・更新</button>
+          </div>
+          <div id="summary-list" class="max-h-80 overflow-y-auto space-y-2 text-xs divide-y">
+            <p class="text-gray-400 text-center py-4">履歴はありません</p>
+          </div>
+        </section>
+      </div>
 
     </main>
 
-    <footer class="text-center p-3 text-xs text-gray-400 bg-gray-100">
+    <footer class="text-center p-3 text-xs text-gray-400 bg-gray-100 w-full">
       &copy; 2026 Receipt Scanner App. 画像データは保持されません。
     </footer>
   </div>
