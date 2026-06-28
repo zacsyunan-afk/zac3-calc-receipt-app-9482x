@@ -373,7 +373,7 @@
       duplicateWarning.classList.add('hidden');
     });
 
-    // 4. スプレッドシートへの確定データ一括保存
+// 4. スプレッドシートへの確定データ一括保存
     saveBtn.addEventListener('click', async () => {
       if (masterCombinedData.receiptNumbers.length === 0) return;
       if (isEditing) { alert('数量の修正を完了してから保存ボタンを押してください。'); return; }
@@ -385,7 +385,7 @@
         // GAS側の「saveBulk」を叩いて一括保存
         const res = await callGas('saveBulk', { data: masterCombinedData });
         if(res.success) { 
-          alert('すべての合算データをデータベースに保存しました。'); 
+          // ★完了のアラートを非表示にしました
           resetUI(); 
           updateSummary(); 
         } else { 
@@ -398,12 +398,11 @@
       }
     });
 
+// ★確認ダイアログなしで即座にクリアするように変更しました
     document.getElementById('cancel-btn').addEventListener('click', () => { 
-      if (confirm('現在合算中のデータがすべてクリアされます。よろしいですか？')) {
-        resetUI(); 
-      }
+      resetUI(); 
     });
-    
+
     function resetUI() {
       resultSection.classList.add('hidden'); 
       cameraSection.classList.remove('hidden');
