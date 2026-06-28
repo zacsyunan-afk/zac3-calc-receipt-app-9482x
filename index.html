@@ -2,10 +2,9 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>レシートスキャンシステム（4:3最適化）</title>
+  <title>レシートスキャンシステム（高機能版）</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* カメラのガイド枠アニメーション */
     .scanner-laser {
       background: linear-gradient(to bottom, rgba(59, 130, 246, 0) 0%, rgba(59, 130, 246, 1) 50%, rgba(59, 130, 246, 0) 100%);
       animation: scan 2.5s linear infinite;
@@ -23,7 +22,7 @@
   <div id="main-app-content" class="flex flex-col justify-between min-h-screen">
     <!-- ヘッダー -->
     <header class="bg-blue-600 text-white shadow-md p-4 text-center">
-      <h1 class="text-xl font-bold tracking-wider">景品レシート自動計算</h1>
+      <h1 class="text-xl font-bold tracking-wider">景品レシート自動計算システム</h1>
     </header>
 
     <!-- メインコンテンツ -->
@@ -31,18 +30,13 @@
       
       <!-- カメラセクション -->
       <section id="camera-section" class="bg-white rounded-2xl shadow-sm overflow-hidden p-2 border border-gray-100">
-        <!-- 🎥 比率を縦60×横80に合わせて aspect-[4/3] に最適化 -->
         <div class="relative bg-black rounded-xl aspect-[4/3] overflow-hidden flex items-center justify-center">
           <video id="video" autoplay playsinline muted class="w-full h-full object-cover"></video>
           <canvas id="canvas" class="hidden"></canvas>
-          
-          <!-- スキャンガイド枠（レシートがぴったり収まる形状） -->
           <div class="absolute inset-x-8 inset-y-6 border-2 border-blue-400 rounded-lg pointer-events-none opacity-70">
             <div class="scanner-laser absolute left-0 w-full h-1 opacity-90"></div>
           </div>
         </div>
-        
-        <!-- 押しやすい大型シャッターボタン -->
         <div class="mt-3 flex justify-center px-1">
           <button id="snap-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition transform active:scale-95 text-lg tracking-wide">
             📸 レシートを撮影して計算
@@ -66,20 +60,68 @@
           <div><span class="text-gray-400">レシート日時:</span> <span id="res-receipt-date" class="font-medium"></span></div>
           <div><span class="text-gray-400">レシートNo:</span> <span id="res-receipt-num" class="font-medium text-blue-600"></span></div>
         </div>
+
+        <!-- 景品テーブル -->
         <table class="w-full text-left border-collapse text-sm">
           <thead>
-            <tr class="border-b text-gray-400"><th class="py-1">景品種別</th><th class="py-1 text-center">個数</th><th class="py-1 text-right">金額</th></tr>
+            <tr class="border-b text-gray-400">
+              <th class="py-1">景品種別</th>
+              <th class="py-1 text-center w-24">個数</th>
+              <th class="py-1 text-right">金額</th>
+            </tr>
           </thead>
           <tbody class="divide-y">
-            <tr><td class="py-2 font-medium">特殊景品（大）</td><td id="count-l" class="text-center font-bold text-lg">0</td><td id="price-l" class="text-right font-medium text-gray-600">¥0</td></tr>
-            <tr><td class="py-2 font-medium">特殊景品（中）</td><td id="count-m" class="text-center font-bold text-lg">0</td><td id="price-m" class="text-right font-medium text-gray-600">¥0</td></tr>
-            <tr><td class="py-2 font-medium">特殊景品（小）</td><td id="count-s" class="text-center font-bold text-lg">0</td><td id="price-s" class="text-right font-medium text-gray-600">¥0</td></tr>
+            <tr>
+              <td class="py-2 font-medium">特殊景品（大）</td>
+              <td class="text-center py-1">
+                <span id="count-l-view" class="font-bold text-lg">0</span>
+                <input type="number" id="count-l-edit" min="0" max="99" class="hidden w-20 text-center border rounded p-1 font-bold">
+              </td>
+              <td id="price-l" class="text-right font-medium text-gray-600">¥0</td>
+            </tr>
+            <tr>
+              <td class="py-2 font-medium">特殊景品（中）</td>
+              <td class="text-center py-1">
+                <span id="count-m-view" class="font-bold text-lg">0</span>
+                <input type="number" id="count-m-edit" min="0" max="99" class="hidden w-20 text-center border rounded p-1 font-bold">
+              </td>
+              <td id="price-m" class="text-right font-medium text-gray-600">¥0</td>
+            </tr>
+            <tr>
+              <td class="py-2 font-medium">特殊景品（小）</td>
+              <td class="text-center py-1">
+                <span id="count-s-view" class="font-bold text-lg">0</span>
+                <input type="number" id="count-s-edit" min="0" max="99" class="hidden w-20 text-center border rounded p-1 font-bold">
+              </td>
+              <td id="price-s" class="text-right font-medium text-gray-600">¥0</td>
+            </tr>
           </tbody>
         </table>
+
+        <!-- 数量修正・確定切り替えボタン -->
+        <div class="text-right">
+          <button id="edit-toggle-btn" class="text-xs bg-gray-100 text-blue-600 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-blue-50 font-medium transition">✏️ 数量を修正する</button>
+        </div>
+
+        <!-- 合計金額 -->
         <div class="bg-blue-50 p-4 rounded-xl flex justify-between items-center">
           <span class="font-bold text-blue-800">合計金額</span>
           <span id="total-amount" class="text-2xl font-black text-blue-600">¥0</span>
         </div>
+
+        <!-- 💵 必要金種表示エリア -->
+        <div class="bg-gray-50 border border-gray-200 rounded-xl p-3 space-y-2">
+          <h4 class="text-xs font-bold text-gray-400 tracking-wider">払い出し金種内訳</h4>
+          <div class="grid grid-cols-5 gap-1.5 text-center text-xs">
+            <div class="bg-white p-2 rounded border"><div class="text-gray-400 font-mono scale-90">1万円</div><div id="denom-10k" class="font-black text-gray-700 text-sm mt-0.5">0枚</div></div>
+            <div class="bg-white p-2 rounded border"><div class="text-gray-400 font-mono scale-90">5千円</div><div id="denom-5k" class="font-black text-gray-700 text-sm mt-0.5">0枚</div></div>
+            <div class="bg-white p-2 rounded border"><div class="text-gray-400 font-mono scale-90">千円</div><div id="denom-1k" class="font-black text-gray-700 text-sm mt-0.5">0枚</div></div>
+            <div class="bg-white p-2 rounded border"><div class="text-gray-400 font-mono scale-90">500円</div><div id="denom-500" class="font-black text-gray-700 text-sm mt-0.5">0枚</div></div>
+            <div class="bg-white p-2 rounded border"><div class="text-gray-400 font-mono scale-90">100円</div><div id="denom-100" class="font-black text-gray-700 text-sm mt-0.5">0枚</div></div>
+          </div>
+        </div>
+
+        <!-- アクションボタン -->
         <div class="flex space-x-3 pt-2">
           <button id="cancel-btn" class="w-1/3 border border-gray-300 text-gray-600 py-3 rounded-xl font-medium active:bg-gray-100">再撮影</button>
           <button id="save-btn" class="w-2/3 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-bold shadow-md active:scale-95 transition">DBに確定保存</button>
@@ -89,10 +131,10 @@
       <!-- 履歴・集計セクション -->
       <section class="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 space-y-3">
         <div class="flex justify-between items-center">
-          <h3 class="font-bold text-gray-700 text-sm">直近の読取履歴（最新30件）</h3>
+          <h3 class="font-bold text-gray-700 text-sm">直近のレシート履歴（最大5件）</h3>
           <button onclick="updateSummary()" class="text-xs text-blue-600 hover:underline">同期・更新</button>
         </div>
-        <div id="summary-list" class="max-h-48 overflow-y-auto space-y-2 text-xs divide-y">
+        <div id="summary-list" class="max-h-60 overflow-y-auto space-y-2 text-xs divide-y">
           <p class="text-gray-400 text-center py-4">履歴はありません</p>
         </div>
       </section>
@@ -113,24 +155,24 @@
     const SECRET_TOKEN = 'your_super_secret_password_1234'; 
     // =================================================================
 
+    const PRICES = { large: 5000, medium: 1000, small: 200 };
+
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const snapBtn = document.getElementById('snap-btn');
     const loading = document.getElementById('loading');
     const resultSection = document.getElementById('result-section');
     const cameraSection = document.getElementById('camera-section');
+    const editToggleBtn = document.getElementById('edit-toggle-btn');
     
     let currentParsedData = null;
+    let isEditing = false;
 
-    // 1. カメラの初期化（解像度を高精細1920x1080以上に指定し文字潰れを防ぐ）
+    // 1. カメラの初期化
     async function initCamera() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { 
-            facingMode: 'environment', 
-            width: { ideal: 1920 }, 
-            height: { ideal: 1080 } 
-          },
+          video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
           audio: false
         });
         video.srcObject = stream;
@@ -155,72 +197,184 @@
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.92); // 高品質を維持
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
       
       cameraSection.classList.add('hidden');
       loading.classList.remove('hidden');
       resultSection.classList.add('hidden');
 
-      try { const result = await callGas('scan', { image: dataUrl }); onSuccessOCR(result); } catch (err) { onFailure(err); }
+      try { 
+        const result = await callGas('scan', { image: dataUrl }); 
+        onSuccessOCR(result); 
+      } catch (err) { 
+        onFailure(err); 
+      }
     });
 
     // 3. OCR成功時の処理
     function onSuccessOCR(result) {
       loading.classList.add('hidden');
-      if (!result.success) { alert('解析エラー: ' + result.error); cameraSection.classList.remove('hidden'); return; }
+      if (!result.success) { 
+        alert('解析エラー: ' + result.error); 
+        cameraSection.classList.remove('hidden'); 
+        return; 
+      }
       currentParsedData = result.data;
+      renderUIWithData();
+      resultSection.classList.remove('hidden');
+    }
+
+    // データを画面と金種シミュレーターに反映する共通関数
+    function renderUIWithData() {
       document.getElementById('res-date-now').innerText = new Date().toLocaleTimeString();
       document.getElementById('res-receipt-date').innerText = currentParsedData.receiptDate;
       document.getElementById('res-receipt-num').innerText = currentParsedData.receiptNumber;
-      document.getElementById('count-l').innerText = currentParsedData.items.large.count;
+      
+      // 表示用テキストの更新
+      document.getElementById('count-l-view').innerText = currentParsedData.items.large.count;
+      document.getElementById('count-m-view').innerText = currentParsedData.items.medium.count;
+      document.getElementById('count-s-view').innerText = currentParsedData.items.small.count;
+      
+      // 入力ボックスの値も同期
+      document.getElementById('count-l-edit').value = currentParsedData.items.large.count;
+      document.getElementById('count-m-edit').value = currentParsedData.items.medium.count;
+      document.getElementById('count-s-edit').value = currentParsedData.items.small.count;
+      
+      // 単価・小計の更新
       document.getElementById('price-l').innerText = '¥' + currentParsedData.items.large.amount.toLocaleString();
-      document.getElementById('count-m').innerText = currentParsedData.items.medium.count;
       document.getElementById('price-m').innerText = '¥' + currentParsedData.items.medium.amount.toLocaleString();
-      document.getElementById('count-s').innerText = currentParsedData.items.small.count;
       document.getElementById('price-s').innerText = '¥' + currentParsedData.items.small.amount.toLocaleString();
+      
+      // 合計金額の更新
       document.getElementById('total-amount').innerText = '¥' + currentParsedData.totalAmount.toLocaleString();
-      resultSection.classList.remove('hidden');
+      
+      // 💵 金種計算（紙幣・硬貨の必要枚数算出）
+      calculateDenominations(currentParsedData.totalAmount);
     }
+
+    // 金種計算ロジック
+    function calculateDenominations(amount) {
+      let rem = amount;
+      const d10k = Math.floor(rem / 10000); rem %= 10000;
+      const d5k  = Math.floor(rem / 5000);  rem %= 5000;
+      const d1k  = Math.floor(rem / 1000);  rem %= 1000;
+      const d500 = Math.floor(rem / 500);   rem %= 500;
+      const d100 = Math.floor(rem / 100);
+      
+      document.getElementById('denom-10k').innerText = d10k + '枚';
+      document.getElementById('denom-5k').innerText  = d5k + '枚';
+      document.getElementById('denom-1k').innerText  = d1k + '枚';
+      document.getElementById('denom-500').innerText = d500 + '枚';
+      document.getElementById('denom-100').innerText = d100 + '枚';
+    }
+
+    // ✏️ 数量修正ボタンの切り替え処理
+    editToggleBtn.addEventListener('click', () => {
+      isEditing = !isEditing;
+      const views = ['count-l-view', 'count-m-view', 'count-s-view'];
+      const edits = ['count-l-edit', 'count-m-edit', 'count-s-edit'];
+      
+      if (isEditing) {
+        views.forEach(id => document.getElementById(id).classList.add('hidden'));
+        edits.forEach(id => document.getElementById(id).classList.remove('hidden'));
+        editToggleBtn.innerText = '✅ 修正を完了する';
+        editToggleBtn.classList.replace('bg-gray-100', 'bg-blue-100');
+      } else {
+        // 修正完了処理：入力された値を取り出してデータオブジェクトを再計算
+        const l = parseInt(document.getElementById('count-l-edit').value) || 0;
+        const m = parseInt(document.getElementById('count-m-edit').value) || 0;
+        const s = parseInt(document.getElementById('count-s-edit').value) || 0;
+        
+        currentParsedData.items.large.count = l;
+        currentParsedData.items.large.amount = l * PRICES.large;
+        currentParsedData.items.medium.count = m;
+        currentParsedData.items.medium.amount = m * PRICES.medium;
+        currentParsedData.items.small.count = s;
+        currentParsedData.items.small.amount = s * PRICES.small;
+        currentParsedData.totalAmount = currentParsedData.items.large.amount + currentParsedData.items.medium.amount + currentParsedData.items.small.amount;
+        
+        views.forEach(id => document.getElementById(id).classList.remove('hidden'));
+        edits.forEach(id => document.getElementById(id).classList.add('hidden'));
+        editToggleBtn.innerText = '✏️ 数量を修正する';
+        editToggleBtn.classList.replace('bg-blue-100', 'bg-gray-100');
+        
+        renderUIWithData(); // 再描画
+      }
+    });
 
     // 4. スプレッドシートへの確定データ転送
     document.getElementById('save-btn').addEventListener('click', async () => {
       if (!currentParsedData) return;
+      if (isEditing) { alert('数量の修正を完了（保存）してから保存ボタンを押してください。'); return; }
+      
       document.getElementById('save-btn').disabled = true;
-      document.getElementById('save-btn').innerText = '保存中...';
+      document.getElementById('save-btn').innerText = '重複チェック＆保存中...';
+      
       try {
         const res = await callGas('save', { data: currentParsedData });
-        if(res.success) { alert('データベースに保存しました。'); resetUI(); updateSummary(); } else { alert('保存失敗: ' + res.error); }
-      } catch (err) { onFailure(err); }
+        if(res.success) { 
+          alert('データベースに保存しました。'); 
+          resetUI(); 
+          updateSummary(); 
+        } else { 
+          // ★ここで同一日の二重読み込みエラー（GAS側で判定）を検知してアラート
+          alert('❌ 読取りエラー:\n' + res.error); 
+          document.getElementById('save-btn').disabled = false; 
+          document.getElementById('save-btn').innerText = 'DBに確定保存';
+        }
+      } catch (err) { 
+        onFailure(err); 
+      }
     });
 
     document.getElementById('cancel-btn').addEventListener('click', () => { resetUI(); });
+    
     function resetUI() {
-      resultSection.classList.add('hidden'); cameraSection.classList.remove('hidden');
-      document.getElementById('save-btn').disabled = false; document.getElementById('save-btn').innerText = 'DBに確定保存';
+      resultSection.classList.add('hidden'); 
+      cameraSection.classList.remove('hidden');
+      document.getElementById('save-btn').disabled = false; 
+      document.getElementById('save-btn').innerText = 'DBに確定保存';
+      if(isEditing) editToggleBtn.click(); // 編集モードを開きっぱなしなら戻す
       currentParsedData = null;
     }
-    function onFailure(err) { loading.classList.add('hidden'); alert('システムエラーが発生しました: ' + err.message); resetUI(); }
+    
+    function onFailure(err) { 
+      loading.classList.add('hidden'); 
+      alert('システムエラーが発生しました: ' + err.message); 
+      resetUI(); 
+    }
 
-    // 5. 履歴データのリアルタイム更新
+    // 5. 履歴データのリアルタイム更新（レシート番号ごとにまとめた5件表示）
     async function updateSummary() {
       try {
         const data = await callGas('getSummary', {});
         const container = document.getElementById('summary-list');
-        if (!data.rows || data.rows.length === 0) { container.innerHTML = '<p class="text-gray-400 text-center py-4">履歴はありません</p>'; return; }
+        if (!data.rows || data.rows.length === 0) { 
+          container.innerHTML = '<p class="text-gray-400 text-center py-4">履歴はありません</p>'; 
+          return; 
+        }
+        
         let html = '';
-        data.rows.forEach(row => {
+        data.rows.forEach(receipt => {
           html += `
-            <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
-              <div>
-                <div class="font-bold text-gray-700">${row.itemName} × ${row.itemCount}</div>
-                <div class="text-[10px] text-gray-400">読取:${row.readDate} | No:${row.receiptNum}</div>
+            <div class="py-2 border-b border-gray-100 space-y-1">
+              <div class="flex justify-between items-center">
+                <span class="font-black text-gray-800 text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">📄 No: ${receipt.receiptNum}</span>
+                <span class="font-mono text-[10px] text-gray-400">日付: ${receipt.receiptDate}</span>
               </div>
-              <div class="font-bold text-blue-600 text-sm">¥${row.amount.toLocaleString()}</div>
+              <div class="text-[11px] text-gray-600 pl-1">
+                ${receipt.details}
+              </div>
+              <div class="text-right font-black text-blue-600 text-sm tracking-wide pr-1">
+                計 ¥${receipt.total.toLocaleString()}
+              </div>
             </div>
           `;
         });
         container.innerHTML = html;
-      } catch (err) { console.error("履歴の同期に失敗しました:", err); }
+      } catch (err) { 
+        console.error("履歴の同期に失敗しました:", err); 
+      }
     }
 
     window.onload = () => {
