@@ -14,13 +14,17 @@
       50% { top: 100%; }
       100% { top: 0%; }
     }
+    /* スマホの入力インプットをさらに見やすく調整 */
+    input[type="number"] {
+      font-size: 1.5rem !important;
+    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col justify-between">
 
   <div id="main-app-content" class="flex flex-col justify-between min-h-screen w-full">
-    <header class="bg-blue-600 text-white shadow-md p-4 text-center w-full">
-      <h1 class="text-xl font-bold tracking-wider">景品レシート自動計算システム0139</h1>
+    <header class="bg-blue-600 text-white shadow-md p-5 text-center w-full">
+      <h1 class="text-2xl font-black tracking-wider">景品レシート自動計算システム0136</h1>
     </header>
 
     <main class="flex-grow p-4 w-full grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
@@ -34,109 +38,105 @@
               <div class="scanner-laser absolute left-0 w-full h-1 opacity-90"></div>
             </div>
           </div>
-          <div class="mt-3 flex justify-center px-1 max-w-3xl mx-auto">
-            <button id="snap-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition transform active:scale-95 text-lg tracking-wide">
+          <div class="mt-4 flex justify-center px-1 max-w-3xl mx-auto">
+            <button id="snap-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-xl shadow-lg transition transform active:scale-95 text-xl tracking-wide">
               📸 レシートを撮影して計算
             </button>
           </div>
         </section>
 
-        <div id="loading" class="hidden text-center p-8 bg-white rounded-2xl shadow-sm border">
-          <div class="animate-spin inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mb-2"></div>
-          <p class="text-gray-500 font-medium">Cloud Vision APIで文字解析中...</p>
+        <div id="loading" class="hidden text-center p-12 bg-white rounded-2xl shadow-sm border">
+          <div class="animate-spin inline-block w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full mb-3"></div>
+          <p class="text-xl text-gray-600 font-bold">Cloud Vision APIで文字解析中...</p>
         </div>
 
-        <section id="result-section" class="hidden bg-white rounded-2xl shadow-lg border-2 border-blue-500 p-5 space-y-4">
+        <section id="result-section" class="hidden bg-white rounded-2xl shadow-lg border-2 border-blue-500 p-5 space-y-5">
           
           <div id="duplicate-warning" class="hidden bg-red-100 border-2 border-red-500 text-red-700 p-4 rounded-xl flex flex-col items-center space-y-1 text-center animate-bounce">
-            <span class="text-2xl">⚠️ 🚨 重複エラー 🚨 ⚠️</span>
-            <p class="font-black text-sm">このレシート（No: <span id="warn-num"></span>）は、本日すでに読み込み・DB保存が完了しています！二重払いに注意してください。</p>
+            <span class="text-2xl font-bold">⚠️ 🚨 重複エラー 🚨 ⚠️</span>
+            <p class="font-black text-base">このレシート（No: <span id="warn-num"></span>）は、本日すでに読み込み・DB保存が完了しています！</p>
           </div>
 
-          <div class="flex justify-between items-center border-b pb-2">
-            <h2 class="text-lg font-bold text-gray-700" id="result-title">読み取り結果（1枚目）</h2>
-            <span class="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded" id="res-date-now"></span>
+          <div class="flex justify-between items-center border-b pb-3">
+            <h2 class="text-xl font-black text-gray-800" id="result-title">読み取り結果</h2>
+            <span class="text-sm bg-gray-100 text-gray-600 px-3 py-1 rounded font-bold" id="res-date-now"></span>
           </div>
 
-          <div id="combined-list-area" class="hidden bg-blue-50 p-3 rounded-xl border border-blue-200 text-xs text-blue-900 space-y-1">
-            <span class="font-bold block text-[11px] uppercase text-blue-700">現在合算中のレシート:</span>
-            <div id="combined-items-tags" class="flex flex-wrap gap-1.5 pt-1"></div>
+          <div id="combined-list-area" class="hidden bg-blue-50 p-4 rounded-xl border border-blue-200 text-blue-900 space-y-2">
+            <span class="font-black block text-sm uppercase text-blue-700">現在合算中のレシート番号:</span>
+            <div id="combined-items-tags" class="flex flex-wrap gap-2 pt-1"></div>
           </div>
 
-          <table class="w-full text-left border-collapse text-sm">
+          <table class="w-full text-left border-collapse text-lg">
             <thead>
-              <tr class="border-b text-gray-400">
-                <th class="py-1">景品種別</th>
-                <th class="py-1 text-center w-24">合算個数</th>
-                <th class="py-1 text-right">金額</th>
+              <tr class="border-b-2 border-gray-200 text-gray-500 font-bold">
+                <th class="py-2 pl-2">景品種別</th>
+                <th class="py-2 text-center w-36">合算個数</th>
               </tr>
             </thead>
-            <tbody class="divide-y">
-              <tr>
-                <td class="py-2 font-medium">特殊景品（大）</td>
-                <td class="text-center py-1">
-                  <span id="count-l-view" class="font-bold text-lg">0</span>
-                  <input type="number" id="count-l-edit" min="0" max="99" class="hidden w-20 text-center border rounded p-1 font-bold">
+            <tbody class="divide-y divide-gray-100">
+              <tr class="hover:bg-gray-50">
+                <td class="py-4 pl-2 font-black text-gray-700 text-xl">特殊景品（大）</td>
+                <td class="text-center py-2">
+                  <span id="count-l-view" class="font-black text-2xl text-blue-600 bg-gray-100 px-4 py-1 rounded-lg">0</span>
+                  <input type="number" id="count-l-edit" min="0" max="99" class="hidden w-24 text-center border-2 border-blue-400 rounded-lg p-2 font-black text-2xl">
                 </td>
-                <td id="price-l" class="text-right font-medium text-gray-600">¥0</td>
               </tr>
-              <tr>
-                <td class="py-2 font-medium">特殊景品（中）</td>
-                <td class="text-center py-1">
-                  <span id="count-m-view" class="font-bold text-lg">0</span>
-                  <input type="number" id="count-m-edit" min="0" max="99" class="hidden w-20 text-center border rounded p-1 font-bold">
+              <tr class="hover:bg-gray-50">
+                <td class="py-4 pl-2 font-black text-gray-700 text-xl">特殊景品（中）</td>
+                <td class="text-center py-2">
+                  <span id="count-m-view" class="font-black text-2xl text-blue-600 bg-gray-100 px-4 py-1 rounded-lg">0</span>
+                  <input type="number" id="count-m-edit" min="0" max="99" class="hidden w-24 text-center border-2 border-blue-400 rounded-lg p-2 font-black text-2xl">
                 </td>
-                <td id="price-m" class="text-right font-medium text-gray-600">¥0</td>
               </tr>
-              <tr>
-                <td class="py-2 font-medium">特殊景品（小）</td>
-                <td class="text-center py-1">
-                  <span id="count-s-view" class="font-bold text-lg">0</span>
-                  <input type="number" id="count-s-edit" min="0" max="99" class="hidden w-20 text-center border rounded p-1 font-bold">
+              <tr class="hover:bg-gray-50">
+                <td class="py-4 pl-2 font-black text-gray-700 text-xl">特殊景品（小）</td>
+                <td class="text-center py-2">
+                  <span id="count-s-view" class="font-black text-2xl text-blue-600 bg-gray-100 px-4 py-1 rounded-lg">0</span>
+                  <input type="number" id="count-s-edit" min="0" max="99" class="hidden w-24 text-center border-2 border-blue-400 rounded-lg p-2 font-black text-2xl">
                 </td>
-                <td id="price-s" class="text-right font-medium text-gray-600">¥0</td>
               </tr>
             </tbody>
           </table>
 
           <div class="text-right">
-            <button id="edit-toggle-btn" class="text-xs bg-gray-100 text-blue-600 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-blue-50 font-medium transition">✏️ 数量を手動修正する</button>
+            <button id="edit-toggle-btn" class="text-sm bg-gray-100 text-blue-600 border border-gray-300 px-4 py-2 rounded-xl hover:bg-blue-50 font-bold transition">✏️ 数量を手動修正する</button>
           </div>
 
-          <div class="bg-blue-600 p-4 rounded-xl flex justify-between items-center text-white shadow-sm">
-            <span class="font-bold" id="total-label">現在までの合算合計金額</span>
-            <span id="total-amount" class="text-2xl font-black">¥0</span>
+          <div class="bg-blue-600 p-5 rounded-xl flex justify-between items-center text-white shadow-sm">
+            <span class="text-lg font-bold" id="total-label">現在までの合算合計金額</span>
+            <span id="total-amount" class="text-3xl font-black tracking-wide">¥0</span>
           </div>
 
-          <div class="space-y-2 pt-2">
-            <div class="flex space-x-2">
-              <button id="cancel-btn" class="w-1/3 border border-gray-300 text-gray-600 py-3 rounded-xl font-medium active:bg-gray-100 text-sm">クリア</button>
-              <button id="next-scan-btn" class="w-2/3 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl font-bold shadow-md active:scale-95 transition text-sm">➕ 次のレシートを追加撮影</button>
+          <div class="space-y-3 pt-2">
+            <div class="flex space-x-3">
+              <button id="cancel-btn" class="w-1/3 border-2 border-gray-300 text-gray-600 py-4 rounded-xl font-bold active:bg-gray-100 text-base">クリア</button>
+              <button id="next-scan-btn" class="w-2/3 bg-blue-500 hover:bg-blue-600 text-white py-4 rounded-xl font-black shadow-md active:scale-95 transition text-base">➕ 次のレシートを追加撮影</button>
             </div>
-            <button id="save-btn" class="w-full bg-green-600 hover:bg-green-700 text-white py-3.5 rounded-xl font-black text-lg shadow-lg active:scale-95 transition disabled:opacity-30 disabled:pointer-events-none">💰 合算金額を確定して保存</button>
+            <button id="save-btn" class="w-full bg-green-600 hover:bg-green-700 text-white py-4.5 rounded-xl font-black text-xl shadow-lg active:scale-95 transition disabled:opacity-30 disabled:pointer-events-none">💰 合算金額を確定して保存</button>
           </div>
         </section>
       </div>
 
       <div class="lg:col-span-5 space-y-4 w-full">
         <div class="border border-gray-200 bg-white rounded-2xl overflow-hidden shadow-sm">
-          <div class="bg-gray-100 px-4 py-2.5 text-xs font-bold text-gray-500 tracking-wider">払い出し金種内訳</div>
+          <div class="bg-gray-100 px-4 py-3 text-sm font-bold text-gray-500 tracking-wider">払い出し金種内訳</div>
           <div class="divide-y divide-gray-200 bg-white">
-            <div class="flex justify-between items-center px-5 py-3"><span class="text-base font-bold text-gray-500">1万円札</span><span id="denom-10k" class="text-xl font-black text-gray-800">0 枚</span></div>
-            <div class="flex justify-between items-center px-5 py-3"><span class="text-base font-bold text-gray-500">5千円札</span><span id="denom-5k" class="text-xl font-black text-gray-800">0 枚</span></div>
-            <div class="flex justify-between items-center px-5 py-3"><span class="text-base font-bold text-gray-500">1千円札</span><span id="denom-1k" class="text-xl font-black text-blue-600">0 枚</span></div>
-            <div class="flex justify-between items-center px-5 py-3"><span class="text-base font-bold text-gray-500">500円玉</span><span id="denom-500" class="text-xl font-black text-gray-800">0 枚</span></div>
-            <div class="flex justify-between items-center px-5 py-3"><span class="text-base font-bold text-gray-500">100円玉</span><span id="denom-100" class="text-xl font-black text-gray-800">0 枚</span></div>
+            <div class="flex justify-between items-center px-5 py-3.5"><span class="text-lg font-bold text-gray-500">1万円札</span><span id="denom-10k" class="text-2xl font-black text-gray-800">0 枚</span></div>
+            <div class="flex justify-between items-center px-5 py-3.5"><span class="text-lg font-bold text-gray-500">5千円札</span><span id="denom-5k" class="text-2xl font-black text-gray-800">0 枚</span></div>
+            <div class="flex justify-between items-center px-5 py-3.5"><span class="text-lg font-bold text-gray-500">1千円札</span><span id="denom-1k" class="text-2xl font-black text-blue-600">0 枚</span></div>
+            <div class="flex justify-between items-center px-5 py-3.5"><span class="text-lg font-bold text-gray-500">500円玉</span><span id="denom-500" class="text-2xl font-black text-gray-800">0 枚</span></div>
+            <div class="flex justify-between items-center px-5 py-3.5"><span class="text-lg font-bold text-gray-500">100円玉</span><span id="denom-100" class="text-2xl font-black text-gray-800">0 枚</span></div>
           </div>
         </div>
 
         <section class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-2xl shadow-md p-5 flex justify-between items-center">
           <div>
-            <h3 class="text-xs font-bold tracking-wider text-blue-100 uppercase">本日撮影分の総合計</h3>
-            <p class="text-xs text-blue-200 mt-0.5" id="today-date-label">----/--/--</p>
+            <h3 class="text-sm font-bold tracking-wider text-blue-100 uppercase">本日撮影分の総合計</h3>
+            <p class="text-sm text-blue-200 mt-0.5" id="today-date-label">----/--/--</p>
           </div>
           <div class="text-right">
-            <span id="today-grand-total" class="text-3xl font-black tracking-wide">¥0</span>
+            <span id="today-grand-total" class="text-4xl font-black tracking-wide">¥0</span>
           </div>
         </section>
 
@@ -179,7 +179,6 @@
     const saveBtn = document.getElementById('save-btn');
     const nextScanBtn = document.getElementById('next-scan-btn');
     
-    // 🛒 複数枚合算用のグローバル状態管理メモリ
     let masterCombinedData = {
       receiptDates: [],
       receiptNumbers: [],
@@ -193,7 +192,6 @@
     
     let isEditing = false;
 
-    // 1. カメラの初期化
     async function initCamera() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -206,7 +204,6 @@
       }
     }
 
-    // 🔑 認証トークン付き通信関数
     async function callGas(action, payloadData) {
       const response = await fetch(GAS_URL, {
         method: 'POST',
@@ -216,7 +213,6 @@
       return await response.json();
     }
 
-    // 2. シャッターボタンイベント
     snapBtn.addEventListener('click', async () => {
       const context = canvas.getContext('2d');
       canvas.width = video.videoWidth;
@@ -238,7 +234,6 @@
       }
     });
 
-    // 3. OCR成功時の処理
     function onSuccessOCR(result) {
       loading.classList.add('hidden');
       if (!result.success) { 
@@ -249,14 +244,12 @@
       
       const newData = result.data;
       
-      // 重複チェック警告（今回スキャンしたレシートが既にDBにあるか）
       if (result.isDuplicate) {
         document.getElementById('warn-num').innerText = newData.receiptNumber;
         duplicateWarning.classList.remove('hidden'); 
         saveBtn.disabled = true; 
       }
 
-      // 🛒 メモリにデータをマージ（合算）していく
       if (!masterCombinedData.receiptNumbers.includes(newData.receiptNumber)) {
         masterCombinedData.receiptNumbers.push(newData.receiptNumber);
       }
@@ -268,15 +261,12 @@
       masterCombinedData.items.medium.count += newData.items.medium.count;
       masterCombinedData.items.small.count += newData.items.small.count;
       
-      // 金額の再計算
       recalculateMasterAmounts();
-      // UIの更新表示
       renderUIWithData();
 
       resultSection.classList.remove('hidden');
     }
 
-    // 金額・内訳の再計算用共通関数
     function recalculateMasterAmounts() {
       masterCombinedData.items.large.amount = masterCombinedData.items.large.count * PRICES.large;
       masterCombinedData.items.medium.amount = masterCombinedData.items.medium.count * PRICES.medium;
@@ -288,22 +278,19 @@
         masterCombinedData.items.small.amount;
     }
 
-    // データを画面と金種シミュレーターに反映する共通関数
     function renderUIWithData() {
       document.getElementById('res-date-now').innerText = new Date().toLocaleTimeString();
       
       const countSheets = masterCombinedData.receiptNumbers.length;
       document.getElementById('result-title').innerText = `合算結果（計 ${countSheets} 枚）`;
       
-      // 合算中のレシートタグ表示
       const listArea = document.getElementById('combined-list-area');
       const tagsContainer = document.getElementById('combined-items-tags');
       listArea.classList.remove('hidden');
       tagsContainer.innerHTML = masterCombinedData.receiptNumbers.map(num => 
-        `<span class="bg-blue-200 text-blue-800 px-2 py-0.5 rounded font-mono font-bold border border-blue-300"># ${num}</span>`
+        `<span class="bg-blue-200 text-blue-800 px-3 py-1 rounded-lg font-mono font-bold border border-blue-300 text-sm"># ${num}</span>`
       ).join('');
       
-      // 表示セルの更新
       document.getElementById('count-l-view').innerText = masterCombinedData.items.large.count;
       document.getElementById('count-m-view').innerText = masterCombinedData.items.medium.count;
       document.getElementById('count-s-view').innerText = masterCombinedData.items.small.count;
@@ -312,16 +299,11 @@
       document.getElementById('count-m-edit').value = masterCombinedData.items.medium.count;
       document.getElementById('count-s-edit').value = masterCombinedData.items.small.count;
       
-      document.getElementById('price-l').innerText = '¥' + masterCombinedData.items.large.amount.toLocaleString();
-      document.getElementById('price-m').innerText = '¥' + masterCombinedData.items.medium.amount.toLocaleString();
-      document.getElementById('price-s').innerText = '¥' + masterCombinedData.items.small.amount.toLocaleString();
-      
       document.getElementById('total-amount').innerText = '¥' + masterCombinedData.totalAmount.toLocaleString();
       
       calculateDenominations(masterCombinedData.totalAmount);
     }
 
-    // 金種計算ロジック
     function calculateDenominations(amount) {
       let rem = amount;
       const d10k = Math.floor(rem / 10000); rem %= 10000;
@@ -337,7 +319,6 @@
       document.getElementById('denom-100').innerText = d100 + ' 枚';
     }
 
-    // ✏️ 数量修正ボタンの切り替え処理
     editToggleBtn.addEventListener('click', () => {
       isEditing = !isEditing;
       const views = ['count-l-view', 'count-m-view', 'count-s-view'];
@@ -368,16 +349,13 @@
       }
     });
 
-    // ➕ 連続追加撮影ボタンイベント
     nextScanBtn.addEventListener('click', () => {
       if (isEditing) { alert('数量の修正を完了してから次の撮影に進んでください。'); return; }
-      // 結果画面を隠し、カメラだけを再起動（メモリ状態はそのまま維持）
       resultSection.classList.add('hidden');
       cameraSection.classList.remove('hidden');
       duplicateWarning.classList.add('hidden');
     });
 
-// 4. スプレッドシートへの確定データ一括保存
     saveBtn.addEventListener('click', async () => {
       if (masterCombinedData.receiptNumbers.length === 0) return;
       if (isEditing) { alert('数量の修正を完了してから保存ボタンを押してください。'); return; }
@@ -386,10 +364,8 @@
       saveBtn.innerText = 'まとめてDB保存中...';
       
       try {
-        // GAS側の「saveBulk」を叩いて一括保存
         const res = await callGas('saveBulk', { data: masterCombinedData });
         if(res.success) { 
-          // ★完了のアラートを非表示にしました
           resetUI(); 
           updateSummary(); 
         } else { 
@@ -402,11 +378,10 @@
       }
     });
 
-// ★確認ダイアログなしで即座にクリアするように変更しました
     document.getElementById('cancel-btn').addEventListener('click', () => { 
       resetUI(); 
     });
-
+    
     function resetUI() {
       resultSection.classList.add('hidden'); 
       cameraSection.classList.remove('hidden');
@@ -416,7 +391,6 @@
       saveBtn.innerText = '💰 合算金額を確定して保存';
       if(isEditing) editToggleBtn.click();
       
-      // 状態の完全初期化
       masterCombinedData = {
         receiptDates: [],
         receiptNumbers: [],
@@ -435,7 +409,6 @@
       resetUI(); 
     }
 
-    // 5. 履歴データおよび当日金額合計のリアルタイム更新
     async function updateSummary() {
       try {
         const today = new Date();
@@ -443,11 +416,9 @@
 
         const data = await callGas('getSummary', {});
         
-        // 💰 当日合計金額の反映
         const grandTotal = data.todayGrandTotal || 0;
         document.getElementById('today-grand-total').innerText = '¥' + grandTotal.toLocaleString();
 
-        // 履歴リストの反映
         const container = document.getElementById('summary-list');
         if (!data.rows || data.rows.length === 0) { 
           container.innerHTML = '<p class="text-gray-400 text-center py-4">本日撮影された履歴はありません</p>'; 
