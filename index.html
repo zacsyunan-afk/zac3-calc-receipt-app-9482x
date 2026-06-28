@@ -25,7 +25,7 @@
 
   <div id="main-app-content" class="flex flex-col justify-between min-h-screen w-full">
     <header class="bg-blue-800 text-white shadow-md p-6 text-center w-full">
-      <h1 class="text-3xl font-black tracking-wider">景品レシート 自動計算システム0158</h1>
+      <h1 class="text-3xl font-black tracking-wider">景品レシート 自動計算システム0206</h1>
     </header>
 
     <main id="operation-screen" class="flex-grow p-4 w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -123,17 +123,6 @@
       </div>
 
       <div class="lg:col-span-5 space-y-6 w-full">
-        <div class="border-2 border-gray-300 bg-white rounded-3xl overflow-hidden shadow-md">
-          <div class="bg-gray-200 px-4 py-3 text-base font-black text-gray-700 tracking-wider text-center">払い出し金種（お渡しするお金）</div>
-          <div class="divide-y-2 divide-gray-200 bg-white font-black text-xl">
-            <div class="flex justify-between items-center px-6 py-4"><span class="text-gray-500 text-2xl">1万円札</span><span id="denom-10k" class="text-3xl text-gray-900">0 枚</span></div>
-            <div class="flex justify-between items-center px-6 py-4"><span class="text-gray-500 text-2xl">5千円札</span><span id="denom-5k" class="text-3xl text-gray-900">0 枚</span></div>
-            <div class="flex justify-between items-center px-6 py-4"><span class="text-gray-500 text-2xl">1千円札</span><span id="denom-1k" class="text-3xl text-blue-700">0 枚</span></div>
-            <div class="flex justify-between items-center px-6 py-4"><span class="text-gray-500 text-2xl">500円玉</span><span id="denom-500" class="text-3xl text-gray-900">0 枚</span></div>
-            <div class="flex justify-between items-center px-6 py-4"><span class="text-gray-500 text-2xl">100円玉</span><span id="denom-100" class="text-3xl text-gray-900">0 枚</span></div>
-          </div>
-        </div>
-
         <section class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white rounded-3xl shadow-md p-6 flex justify-between items-center">
           <div>
             <h3 class="text-base font-black tracking-wider text-blue-100 uppercase">今日のこれまでの総合計</h3>
@@ -195,7 +184,7 @@
 
   <script>
     // =================================================================
-    // ⚙️ 【設定エリア】環境に合わせて必ずここを書き換してください
+    // ⚙️ 【設定エリア】環境に合わせて必ずここを書き換えてください
     // =================================================================
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbyPRx0rt3PU-2jAk9j1b-8uAjR6P5yYR7hYAlMk9QxeWoBoHpn1VBx0-r0eZFVGCsU2/exec'; 
     const SECRET_TOKEN = 'your_super_secret_password_1234'; 
@@ -351,12 +340,7 @@
       const d500 = Math.floor(rem / 500);   rem %= 500;
       const d100 = Math.floor(rem / 100);
       
-      document.getElementById('denom-10k').innerText = d10k + ' 枚';
-      document.getElementById('denom-5k').innerText  = d5k + ' 枚';
-      document.getElementById('denom-1k').innerText  = d1k + ' 枚';
-      document.getElementById('denom-500').innerText = d500 + ' 枚';
-      document.getElementById('denom-100').innerText = d100 + ' 枚';
-
+      // 通常画面の要素は削除されたため、精算完了画面（payout-）の要素のみ値を書き込みます
       document.getElementById('payout-denom-10k').innerText = d10k + ' 枚';
       document.getElementById('payout-denom-5k').innerText  = d5k + ' 枚';
       document.getElementById('payout-denom-1k').innerText  = d1k + ' 枚';
@@ -466,7 +450,6 @@
       resetUI(); 
     }
 
-    // 🔄 履歴データのリアルタイム更新（シニア向け特大フォント化）
     async function updateSummary() {
       try {
         const today = new Date();
@@ -485,7 +468,6 @@
         
         let html = '';
         data.rows.forEach(receipt => {
-          // ★ 下記のHTMLを書き換え、文字サイズを大幅に大きく、極太に強化しました。
           html += `
             <div class="py-4 border-b border-gray-200 space-y-2">
               <div class="flex justify-between items-center">
