@@ -14,7 +14,6 @@
       50% { top: 100%; }
       100% { top: 0%; }
     }
-    /* スマホの入力インプットをさらに見やすく調整 */
     input[type="number"] {
       font-size: 1.5rem !important;
     }
@@ -24,10 +23,10 @@
 
   <div id="main-app-content" class="flex flex-col justify-between min-h-screen w-full">
     <header class="bg-blue-600 text-white shadow-md p-5 text-center w-full">
-      <h1 class="text-2xl font-black tracking-wider">景品レシート自動計算システム0136</h1>
+      <h1 class="text-2xl font-black tracking-wider">景品レシート自動計算システム0141</h1>
     </header>
 
-    <main class="flex-grow p-4 w-full grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+    <main id="operation-screen" class="flex-grow p-4 w-full grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
       
       <div class="lg:col-span-7 space-y-4 w-full">
         <section id="camera-section" class="bg-white rounded-2xl shadow-sm overflow-hidden p-3 border border-gray-100">
@@ -150,8 +149,39 @@
           </div>
         </section>
       </div>
-
     </main>
+
+    <div id="payout-screen" class="hidden flex-grow p-4 w-full max-w-4xl mx-auto flex flex-col justify-center items-center space-y-6">
+      <div class="w-full bg-white rounded-3xl shadow-2xl border-4 border-green-500 p-6 md:p-10 space-y-6 text-center">
+        
+        <div class="flex flex-col items-center justify-center space-y-1">
+          <span class="text-5xl">✅</span>
+          <h2 class="text-3xl font-black text-green-600 tracking-wider">データ保存・精算完了</h2>
+        </div>
+
+        <div class="bg-gray-900 text-green-400 rounded-2xl p-6 shadow-inner">
+          <p class="text-gray-400 text-sm font-bold tracking-widest uppercase">払出合計金額</p>
+          <p id="payout-total-amount" class="text-5xl md:text-6xl font-black tracking-wide mt-1">¥0</p>
+        </div>
+
+        <div class="border-2 border-gray-200 rounded-2xl overflow-hidden bg-gray-50 shadow-sm max-w-md mx-auto text-left">
+          <div class="bg-gray-200 px-5 py-3 text-base font-black text-gray-600 tracking-wider text-center">払い出し金種</div>
+          <div class="divide-y divide-gray-200 bg-white font-black text-xl">
+            <div class="flex justify-between items-center px-6 py-4"><span class="text-gray-500">1万円札</span><span id="payout-denom-10k" class="text-3xl text-gray-800">0 枚</span></div>
+            <div class="flex justify-between items-center px-6 py-4"><span class="text-gray-500">5千円札</span><span id="payout-denom-5k" class="text-3xl text-gray-800">0 枚</span></div>
+            <div class="flex justify-between items-center px-6 py-4"><span class="text-gray-500">1千円札</span><span id="payout-denom-1k" class="text-3xl text-blue-600">0 枚</span></div>
+            <div class="flex justify-between items-center px-6 py-4"><span class="text-gray-500">500円玉</span><span id="payout-denom-500" class="text-3xl text-gray-800">0 枚</span></div>
+            <div class="flex justify-between items-center px-6 py-4"><span class="text-gray-500">100円玉</span><span id="payout-denom-100" class="text-3xl text-gray-800">0 枚</span></div>
+          </div>
+        </div>
+
+        <div class="pt-4 max-w-md mx-auto">
+          <button id="payout-done-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-5 rounded-2xl font-black text-2xl shadow-xl transition transform active:scale-95 tracking-wide">
+            🔄 次のスキャンへ進む
+          </button>
+        </div>
+      </div>
+    </div>
 
     <footer class="text-center p-3 text-xs text-gray-400 bg-gray-100 w-full">
       &copy; 2026 Receipt Scanner App. 画像データは保持されません。
@@ -178,6 +208,11 @@
     const duplicateWarning = document.getElementById('duplicate-warning');
     const saveBtn = document.getElementById('save-btn');
     const nextScanBtn = document.getElementById('next-scan-btn');
+    
+    // 画面切り替え用の要素
+    const operationScreen = document.getElementById('operation-screen');
+    const payoutScreen = document.getElementById('payout-screen');
+    const payoutDoneBtn = document.getElementById('payout-done-btn');
     
     let masterCombinedData = {
       receiptDates: [],
@@ -312,11 +347,19 @@
       const d500 = Math.floor(rem / 500);   rem %= 500;
       const d100 = Math.floor(rem / 100);
       
+      // 通常画面側の更新
       document.getElementById('denom-10k').innerText = d10k + ' 枚';
       document.getElementById('denom-5k').innerText  = d5k + ' 枚';
       document.getElementById('denom-1k').innerText  = d1k + ' 枚';
       document.getElementById('denom-500').innerText = d500 + ' 枚';
       document.getElementById('denom-100').innerText = d100 + ' 枚';
+
+      // 払い出し完了画面側の更新
+      document.getElementById('payout-denom-10k').innerText = d10k + ' 枚';
+      document.getElementById('payout-denom-5k').innerText  = d5k + ' 枚';
+      document.getElementById('payout-denom-1k').innerText  = d1k + ' 枚';
+      document.getElementById('payout-denom-500').innerText = d500 + ' 枚';
+      document.getElementById('payout-denom-100').innerText = d100 + ' 枚';
     }
 
     editToggleBtn.addEventListener('click', () => {
@@ -366,7 +409,12 @@
       try {
         const res = await callGas('saveBulk', { data: masterCombinedData });
         if(res.success) { 
-          resetUI(); 
+          // ★保存成功：精算完了画面へ金額を設定して切り替える
+          document.getElementById('payout-total-amount').innerText = '¥' + masterCombinedData.totalAmount.toLocaleString();
+          
+          operationScreen.classList.add('hidden');
+          payoutScreen.classList.remove('hidden');
+          
           updateSummary(); 
         } else { 
           alert('保存エラー:\n' + res.error); 
@@ -376,6 +424,13 @@
       } catch (err) { 
         onFailure(err); 
       }
+    });
+
+    // 精算完了画面の「次のスキャンへ進む」ボタンイベント
+    payoutDoneBtn.addEventListener('click', () => {
+      resetUI();
+      payoutScreen.classList.add('hidden');
+      operationScreen.classList.remove('hidden');
     });
 
     document.getElementById('cancel-btn').addEventListener('click', () => { 
