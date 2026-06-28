@@ -33,7 +33,7 @@
       <section id="camera-section" class="bg-white rounded-2xl shadow-sm overflow-hidden p-2 border border-gray-100">
         <!-- 🎥 比率を縦60×横80に合わせて aspect-[4/3] に最適化 -->
         <div class="relative bg-black rounded-xl aspect-[4/3] overflow-hidden flex items-center justify-center">
-          <video id="video" autoplay playsinline class="w-full h-full object-cover"></video>
+          <video id="video" autoplay playsinline muted class="w-full h-full object-cover"></video>
           <canvas id="canvas" class="hidden"></canvas>
           
           <!-- スキャンガイド枠（レシートがぴったり収まる形状） -->
@@ -109,7 +109,7 @@
     // =================================================================
     // ⚙️ 【設定エリア】環境に合わせて必ずここを書き換えてください
     // =================================================================
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbyPRx0rt3PU-2jAk9j1b-8uAjR6P5yYR7hYAlMk9QxeWoBoHpn1VBx0-r0eZFVGCsU2/exec'; 
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzhnjc-3mGZdTada09Bf2JRoq8UuiZMgFZHh5emDMLDpTP944tit43qR9TA1xfD9_c/exec'; 
     const SECRET_TOKEN = 'your_super_secret_password_1234'; 
     // =================================================================
 
@@ -122,14 +122,14 @@
     
     let currentParsedData = null;
 
-    // 1. カメラの初期化（4:3のレシート形状を高精細で捉えられる解像度を要求）
+    // 1. カメラの初期化（解像度を高精細1920x1080以上に指定し文字潰れを防ぐ）
     async function initCamera() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { 
             facingMode: 'environment', 
-            width: { ideal: 1600 }, 
-            height: { ideal: 1200 } 
+            width: { ideal: 1920 }, 
+            height: { ideal: 1080 } 
           },
           audio: false
         });
@@ -155,7 +155,7 @@
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.92); // 高品質を維持
       
       cameraSection.classList.add('hidden');
       loading.classList.remove('hidden');
