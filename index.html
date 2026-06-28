@@ -25,7 +25,7 @@
 
   <div id="main-app-content" class="flex flex-col justify-between min-h-screen w-full">
     <header class="bg-blue-800 text-white shadow-md p-6 text-center w-full">
-      <h1 class="text-3xl font-black tracking-wider">景品レシート 自動計算システム0157</h1>
+      <h1 class="text-3xl font-black tracking-wider">景品レシート 自動計算システム0158</h1>
     </header>
 
     <main id="operation-screen" class="flex-grow p-4 w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -145,12 +145,12 @@
         </section>
 
         <section class="bg-white rounded-3xl shadow-sm p-5 border border-gray-200 space-y-4">
-          <div class="flex justify-between items-center">
-            <h3 class="font-black text-gray-800 text-base">直近の履歴（今日保存した最新5件）</h3>
-            <button onclick="updateSummary()" class="text-sm text-blue-700 font-black bg-blue-50 px-3 py-1 rounded-lg border border-blue-200 hover:underline">🔄 最新にする</button>
+          <div class="flex justify-between items-center border-b pb-2">
+            <h3 class="font-black text-gray-900 text-lg">📁 直近の履歴（最新5件）</h3>
+            <button onclick="updateSummary()" class="text-base text-blue-700 font-black bg-blue-50 px-4 py-2 rounded-xl border-2 border-blue-200 hover:underline">🔄 最新にする</button>
           </div>
-          <div id="summary-list" class="max-h-80 overflow-y-auto space-y-3 text-sm divide-y-2">
-            <p class="text-gray-400 text-center py-5 font-bold">まだ履歴はありません</p>
+          <div id="summary-list" class="max-h-96 overflow-y-auto space-y-4 divide-y-2">
+            <p class="text-gray-400 text-center py-5 font-bold text-lg">まだ履歴はありません</p>
           </div>
         </section>
       </div>
@@ -437,7 +437,6 @@
       resetUI(); 
     });
     
-    // ★ 画面表示の全データをクリアする関数
     function resetUI() {
       resultSection.classList.add('hidden'); 
       cameraSection.classList.remove('hidden');
@@ -447,7 +446,6 @@
       saveBtn.innerText = '💰 合算金額を確定して保存する';
       if(isEditing) editToggleBtn.click();
       
-      // データ構造のリセット
       masterCombinedData = {
         receiptDates: [],
         receiptNumbers: [],
@@ -459,7 +457,6 @@
         totalAmount: 0
       };
 
-      // ★ 右側の「払い出し金種枚数」の表示もすべて0枚にリセット
       calculateDenominations(0);
     }
     
@@ -469,6 +466,7 @@
       resetUI(); 
     }
 
+    // 🔄 履歴データのリアルタイム更新（シニア向け特大フォント化）
     async function updateSummary() {
       try {
         const today = new Date();
@@ -481,23 +479,24 @@
 
         const container = document.getElementById('summary-list');
         if (!data.rows || data.rows.length === 0) { 
-          container.innerHTML = '<p class="text-gray-400 text-center py-5 font-bold">まだ履歴はありません</p>'; 
+          container.innerHTML = '<p class="text-gray-400 text-center py-5 font-bold text-lg">まだ履歴はありません</p>'; 
           return; 
         }
         
         let html = '';
         data.rows.forEach(receipt => {
+          // ★ 下記のHTMLを書き換え、文字サイズを大幅に大きく、極太に強化しました。
           html += `
-            <div class="py-3 border-b border-gray-200 space-y-1">
+            <div class="py-4 border-b border-gray-200 space-y-2">
               <div class="flex justify-between items-center">
-                <span class="font-black text-gray-900 text-sm bg-blue-50 text-blue-700 px-3 py-1 rounded">📄 No: ${receipt.receiptNum}</span>
-                <span class="font-mono text-xs text-gray-400">時間: ${receipt.readDate.split(' ')[1] || ''}</span>
+                <span class="font-black text-gray-900 text-lg bg-blue-100 text-blue-800 px-3 py-1 rounded-xl border border-blue-300">📄 レシートNo: ${receipt.receiptNum}</span>
+                <span class="font-bold text-sm text-gray-500">時間: ${receipt.readDate.split(' ')[1] || ''}</span>
               </div>
-              <div class="text-sm text-gray-700 pl-1 font-bold">
-                内訳: ${receipt.details}
+              <div class="text-base text-gray-800 pl-1 font-black tracking-wide leading-relaxed">
+                内容: ${receipt.details}
               </div>
-              <div class="text-right font-black text-blue-700 text-lg tracking-wide pr-1">
-                計 ¥${receipt.total.toLocaleString()}
+              <div class="text-right font-black text-blue-700 text-2xl tracking-wide bg-blue-50 px-3 py-1.5 rounded-xl inline-block w-full">
+                金額: ¥${receipt.total.toLocaleString()}
               </div>
             </div>
           `;
