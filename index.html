@@ -24,7 +24,7 @@
 
   <div id="main-app-content" class="flex flex-col justify-between min-h-screen w-full">
     <header class="bg-blue-800 text-white shadow-md p-6 text-center w-full">
-      <h1 class="text-3xl font-black tracking-wider">景品レシート 自動計算システム1852</h1>
+      <h1 class="text-3xl font-black tracking-wider">景品レシート 自動計算システム1905</h1>
     </header>
 
     <main id="operation-screen" class="flex-grow p-4 w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -120,7 +120,6 @@
       </div>
 
       <div class="lg:col-span-5 space-y-6 w-full">
-        
         <section class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white rounded-3xl shadow-md p-6 space-y-4">
           <div class="flex justify-between items-center border-b border-blue-600 pb-3">
             <div>
@@ -277,6 +276,7 @@
         return; 
       }
       
+      // ★ 毎回ここをリフレッシュするのではなく、resultから来た「今回の単体データ」を正しく足し上げる
       const newData = result.data;
       
       if (result.isDuplicate) {
@@ -292,6 +292,7 @@
         masterCombinedData.receiptDates.push(newData.receiptDate);
       }
 
+      // 今回読み取った枚数を「加算」する
       masterCombinedData.items.large.count += newData.items.large.count;
       masterCombinedData.items.medium.count += newData.items.medium.count;
       masterCombinedData.items.small.count += newData.items.small.count;
@@ -463,11 +464,9 @@
 
         const data = await callGas('getSummary', {});
         
-        // 1. 総合計金額の更新
         const grandTotal = data.todayGrandTotal || 0;
         document.getElementById('today-grand-total').innerText = '¥' + grandTotal.toLocaleString();
 
-        // 2. 金種別累計枚数の更新 (新規追加部分)
         const d = data.todayDenoms || { d10k: 0, d5k: 0, d1k: 0, d500: 0, d100: 0 };
         document.getElementById('today-denom-10k').innerText = (d.d10k || 0) + ' 枚';
         document.getElementById('today-denom-5k').innerText  = (d.d5k  || 0) + ' 枚';
@@ -475,7 +474,6 @@
         document.getElementById('today-denom-500').innerText = (d.d500 || 0) + ' 枚';
         document.getElementById('today-denom-100').innerText = (d.d100 || 0) + ' 枚';
 
-        // 3. 直近の履歴リスト更新
         const container = document.getElementById('summary-list');
         if (!data.rows || data.rows.length === 0) { 
           container.innerHTML = '<p class="text-gray-400 text-center py-5 font-bold text-lg">まだ履歴はありません</p>'; 
