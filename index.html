@@ -106,12 +106,19 @@
             <span class="text-xl font-black" id="total-label">ここまでの合算合計</span>
             <span id="total-amount" class="text-4xl font-black tracking-wide bg-blue-900 px-4 py-1 rounded-xl">¥0</span>
           </div>
-
-          <div class="space-y-5 pt-3">
+          
+        <div class="space-y-5 pt-3">
             <div class="flex space-x-4">
-              <button id="cancel-btn" class="w-1/3 border-4 border-gray-400 text-gray-700 py-5 rounded-2xl font-black active:bg-gray-200 text-lg shadow-sm">全部消して<br>最初から</button>
-              <button id="next-scan-btn" class="w-2/3 bg-blue-600 hover:bg-blue-700 text-white py-5 rounded-2xl font-black shadow-md active:scale-95 transition text-xl tracking-wide border-b-4 border-blue-800">➕ まだある<br><span class="text-sm font-bold">(次のレシートを足す)</span></button>
+              <button id="cancel-btn" class="w-1/3 border-4 border-red-500 text-red-600 hover:bg-red-50 py-6 rounded-2xl font-black active:bg-red-100 text-xl md:text-2xl leading-tight shadow-md transition">
+                ❌ 全部消して<br>最初から
+              </button>
+              
+              <button id="next-scan-btn" class="w-2/3 bg-blue-600 hover:bg-blue-700 text-white py-6 rounded-2xl font-black shadow-xl active:scale-95 transition text-2xl md:text-3xl tracking-wide border-b-8 border-blue-800 leading-tight">
+                ➕ まだある<br>
+                <span class="text-base md:text-lg font-bold text-blue-100">(次のレシートを足す)</span>
+              </button>
             </div>
+            
             <button id="save-btn" class="w-full bg-green-600 hover:bg-green-700 text-white py-7 rounded-2xl font-black text-3xl shadow-2xl transition transform active:scale-95 disabled:opacity-30 disabled:pointer-events-none tracking-wider border-b-8 border-green-900">
               💰 間違い無いので精算画面へ進む
             </button>
@@ -204,7 +211,7 @@
     </div>
 
     <footer class="text-center p-4 text-sm text-gray-500 bg-gray-200 w-full font-bold">
-      &copy; P・ZAC周南店 景品自動計算システム
+      &copy; 2026 P・ZAC周南店 景品自動計算システム
     </footer>
   </div>
 
