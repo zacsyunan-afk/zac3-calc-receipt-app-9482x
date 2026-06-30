@@ -14,9 +14,10 @@
       50% { top: 100%; }
       100% { top: 0%; }
     }
+    /* 【変更】手動入力フォームの文字サイズと高さを大幅にアップ */
     input[type="number"] {
-      font-size: 2rem !important;
-      height: 4.5rem !important;
+      font-size: 3.5rem !important; /* 2remから3.5remへ拡大 */
+      height: 5.5rem !important; /* 4.5remから5.5remへ拡大 */
     }
   </style>
 </head>
@@ -24,7 +25,7 @@
 
   <div id="main-app-content" class="flex flex-col justify-between min-h-screen w-full">
     <header class="bg-blue-800 text-white shadow-md p-6 text-center w-full">
-      <h1 class="text-3xl font-black tracking-wider">景品レシート 自動計算アプリ10</h1>
+      <h1 class="text-3xl font-black tracking-wider">景品レシート 自動計算アプリ</h1>
     </header>
 
     <main id="operation-screen" class="flex-grow p-4 w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -70,29 +71,29 @@
             <thead>
               <tr class="border-b-4 border-gray-300 text-gray-600 font-black text-xl">
                 <th class="py-2 pl-2">景品の種類</th>
-                <th class="py-2 text-center w-40">現在の個数</th>
+                <th class="py-2 text-center w-48">現在の個数</th>
               </tr>
             </thead>
             <tbody class="divide-y-2 divide-gray-200">
               <tr class="hover:bg-gray-50">
                 <td class="py-5 pl-2 font-black text-gray-800 text-2xl flex items-center"><span class="text-red-500 mr-2 text-3xl">🔴</span>特殊景品（大）</td>
                 <td class="text-center py-2">
-                  <span id="count-l-view" class="font-black text-3xl text-blue-700 bg-gray-100 px-6 py-2 rounded-xl border border-gray-300 inline-block w-24">0</span>
-                  <input type="number" id="count-l-edit" min="0" max="99" class="hidden w-28 text-center border-4 border-blue-500 rounded-xl p-2 font-black">
+                  <span id="count-l-view" class="font-black text-5xl text-blue-700 bg-gray-100 px-6 py-3 rounded-xl border border-gray-300 inline-block w-36">0</span>
+                  <input type="number" id="count-l-edit" min="0" max="99" class="hidden w-36 text-center border-4 border-blue-500 rounded-xl p-2 font-black">
                 </td>
               </tr>
               <tr class="hover:bg-gray-50">
                 <td class="py-5 pl-2 font-black text-gray-800 text-2xl flex items-center"><span class="text-amber-400 mr-2 text-3xl">🟡</span>特殊景品（中）</td>
                 <td class="text-center py-2">
-                  <span id="count-m-view" class="font-black text-3xl text-blue-700 bg-gray-100 px-6 py-2 rounded-xl border border-gray-300 inline-block w-24">0</span>
-                  <input type="number" id="count-m-edit" min="0" max="99" class="hidden w-28 text-center border-4 border-blue-500 rounded-xl p-2 font-black">
+                  <span id="count-m-view" class="font-black text-5xl text-blue-700 bg-gray-100 px-6 py-3 rounded-xl border border-gray-300 inline-block w-36">0</span>
+                  <input type="number" id="count-m-edit" min="0" max="99" class="hidden w-36 text-center border-4 border-blue-500 rounded-xl p-2 font-black">
                 </td>
               </tr>
               <tr class="hover:bg-gray-50">
                 <td class="py-5 pl-2 font-black text-gray-800 text-2xl flex items-center"><span class="text-blue-500 mr-2 text-3xl">🔵</span>特殊景品（小）</td>
                 <td class="text-center py-2">
-                  <span id="count-s-view" class="font-black text-3xl text-blue-700 bg-gray-100 px-6 py-2 rounded-xl border border-gray-300 inline-block w-24">0</span>
-                  <input type="number" id="count-s-edit" min="0" max="99" class="hidden w-28 text-center border-4 border-blue-500 rounded-xl p-2 font-black">
+                  <span id="count-s-view" class="font-black text-5xl text-blue-700 bg-gray-100 px-6 py-3 rounded-xl border border-gray-300 inline-block w-36">0</span>
+                  <input type="number" id="count-s-edit" min="0" max="99" class="hidden w-36 text-center border-4 border-blue-500 rounded-xl p-2 font-black">
                 </td>
               </tr>
             </tbody>
@@ -153,7 +154,7 @@
             </div>
             <div class="flex justify-between items-center bg-blue-50 border-2 border-blue-300 rounded-2xl px-5 py-3 shadow-md">
               <span class="text-xl text-blue-900">1千円札</span>
-              <span id="today-denom-1k" class="text-4xl text-blue-700 font-mono">0 <span class="text-base font-bold text-blue-500">枚</span></span>
+              <span id="today-denom-1k" class="text-4xl text-blue-700 font-mono">0 <span class="text-base font-bold text-gray-500">枚</span></span>
             </div>
             <div class="flex justify-between items-center bg-gray-50 border border-gray-300 rounded-2xl px-5 py-3 shadow-sm">
               <span class="text-xl text-gray-600">500円玉</span>
@@ -417,33 +418,27 @@
       duplicateWarning.classList.add('hidden');
     });
 
-    // 🔄 【変更点】ここではDBに保存せず、画面遷移のみを行います
     saveBtn.addEventListener('click', () => {
       if (masterCombinedData.receiptNumbers.length === 0) return;
       if (isEditing) { alert('数量の修正を完了してから次に進んでください。'); return; }
       
-      // お渡し金額を画面にセットして精算画面へ切り替え
       document.getElementById('payout-total-amount').innerText = '¥' + masterCombinedData.totalAmount.toLocaleString();
       operationScreen.classList.add('hidden');
       payoutScreen.classList.remove('hidden');
     });
 
-    // 💾 【変更点】「次の人のレシートへ進む（保存確定）」ボタンを押したタイミングで通信（DB書き込み）を開始
     payoutDoneBtn.addEventListener('click', async () => {
       payoutDoneBtn.disabled = true;
       payoutDoneBtn.innerText = 'データを完全に保存中...';
       
       try {
-        // ここで初めてGASへデータを一括送信して保存する
         const res = await callGas('saveBulk', { data: masterCombinedData });
         if(res.success) { 
-          // 保存成功したら、初期化してメイン画面へ戻る
           resetUI();
           payoutScreen.classList.add('hidden');
           operationScreen.classList.remove('hidden');
-          updateSummary(); // 履歴を最新にする
+          updateSummary();
         } else { 
-          // 万が一エラーになっても、まだ画面にデータが残っているので安全にリトライできます
           alert('データベース保存エラー:\n' + res.error + '\nもう一度お試しください。'); 
         }
       } catch (err) { 
