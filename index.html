@@ -24,7 +24,7 @@
 
   <div id="main-app-content" class="flex flex-col justify-between min-h-screen w-full">
     <header class="bg-blue-800 text-white shadow-md p-6 text-center w-full">
-      <h1 class="text-3xl font-black tracking-wider">景品レシート 自動計算システム1954</h1>
+      <h1 class="text-3xl font-black tracking-wider">景品レシート 自動計算システム2030</h1>
     </header>
 
     <main id="operation-screen" class="flex-grow p-4 w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -113,7 +113,7 @@
               <button id="next-scan-btn" class="w-2/3 bg-blue-600 hover:bg-blue-700 text-white py-5 rounded-2xl font-black shadow-md active:scale-95 transition text-xl tracking-wide border-b-4 border-blue-800">➕ まだある<br><span class="text-sm font-bold">(次のレシートを足す)</span></button>
             </div>
             <button id="save-btn" class="w-full bg-green-600 hover:bg-green-700 text-white py-7 rounded-2xl font-black text-3xl shadow-2xl transition transform active:scale-95 disabled:opacity-30 disabled:pointer-events-none tracking-wider border-b-8 border-green-900">
-              💰 合算金額を確定して保存する
+              💰 金額を確認して精算画面へ進む
             </button>
           </div>
         </section>
@@ -136,32 +136,26 @@
             </h3>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-5 lg:grid-cols-1 gap-3 font-black">
-            
             <div class="flex justify-between items-center bg-gray-50 border border-gray-300 rounded-2xl px-5 py-3 shadow-sm">
               <span class="text-xl text-gray-600">1万円札</span>
               <span id="today-denom-10k" class="text-3xl text-gray-900 font-mono">0 <span class="text-base font-bold text-gray-500">枚</span></span>
             </div>
-            
             <div class="flex justify-between items-center bg-gray-50 border border-gray-300 rounded-2xl px-5 py-3 shadow-sm">
               <span class="text-xl text-gray-600">5千円札</span>
               <span id="today-denom-5k" class="text-3xl text-gray-900 font-mono">0 <span class="text-base font-bold text-gray-500">枚</span></span>
             </div>
-            
             <div class="flex justify-between items-center bg-blue-50 border-2 border-blue-300 rounded-2xl px-5 py-3 shadow-md">
               <span class="text-xl text-blue-900">1千円札</span>
               <span id="today-denom-1k" class="text-4xl text-blue-700 font-mono">0 <span class="text-base font-bold text-blue-500">枚</span></span>
             </div>
-            
             <div class="flex justify-between items-center bg-gray-50 border border-gray-300 rounded-2xl px-5 py-3 shadow-sm">
               <span class="text-xl text-gray-600">500円玉</span>
               <span id="today-denom-500" class="text-3xl text-gray-900 font-mono">0 <span class="text-base font-bold text-gray-500">枚</span></span>
             </div>
-            
             <div class="flex justify-between items-center bg-gray-50 border border-gray-300 rounded-2xl px-5 py-3 shadow-sm">
               <span class="text-xl text-gray-600">100円玉</span>
               <span id="today-denom-100" class="text-3xl text-gray-900 font-mono">0 <span class="text-base font-bold text-gray-500">枚</span></span>
             </div>
-            
           </div>
         </section>
 
@@ -178,15 +172,14 @@
             <p class="text-gray-400 text-center py-5 font-bold text-lg">まだ履歴はありません</p>
           </div>
         </section>
-        
       </div>
     </main>
 
     <div id="payout-screen" class="hidden flex-grow p-4 w-full max-w-4xl mx-auto flex flex-col justify-center items-center space-y-6">
       <div class="w-full bg-white rounded-3xl shadow-2xl border-8 border-green-500 p-6 md:p-10 space-y-6 text-center">
         <div class="flex flex-col items-center justify-center space-y-1">
-          <span class="text-6xl">✅</span>
-          <h2 class="text-4xl font-black text-green-700 tracking-wider">保存しました（精算完了）</h2>
+          <span class="text-6xl">💵</span>
+          <h2 class="text-4xl font-black text-green-700 tracking-wider">現金を確認してお渡しください</h2>
         </div>
         <div class="bg-gray-900 text-green-400 rounded-2xl p-6 shadow-inner">
           <p class="text-gray-400 text-base font-black tracking-widest uppercase">お渡しする合計金額</p>
@@ -204,7 +197,7 @@
         </div>
         <div class="pt-4 max-w-md mx-auto">
           <button id="payout-done-btn" class="w-full bg-blue-700 hover:bg-blue-800 text-white py-6 rounded-2xl font-black text-3xl shadow-xl transition transform active:scale-95 tracking-wide border-b-8 border-blue-900">
-            🔄 次の人のレシートへ進む
+            💰 現金を渡して、データをDBに保存
           </button>
         </div>
       </div>
@@ -417,36 +410,41 @@
       duplicateWarning.classList.add('hidden');
     });
 
-    saveBtn.addEventListener('click', async () => {
+    // 🔄 【変更点】ここではDBに保存せず、画面遷移のみを行います
+    saveBtn.addEventListener('click', () => {
       if (masterCombinedData.receiptNumbers.length === 0) return;
-      if (isEditing) { alert('数量の修正を完了してから保存ボタンを押してください。'); return; }
+      if (isEditing) { alert('数量の修正を完了してから次に進んでください。'); return; }
       
-      saveBtn.disabled = true;
-      saveBtn.innerText = 'ただいまデータベースに保存中...';
-      
-      try {
-        const res = await callGas('saveBulk', { data: masterCombinedData });
-        if(res.success) { 
-          document.getElementById('payout-total-amount').innerText = '¥' + masterCombinedData.totalAmount.toLocaleString();
-          
-          operationScreen.classList.add('hidden');
-          payoutScreen.classList.remove('hidden');
-          
-          updateSummary(); 
-        } else { 
-          alert('保存エラー:\n' + res.error); 
-          saveBtn.disabled = false; 
-          saveBtn.innerText = '💰 合算金額を確定して保存する';
-        }
-      } catch (err) { 
-        onFailure(err); 
-      }
+      // お渡し金額を画面にセットして精算画面へ切り替え
+      document.getElementById('payout-total-amount').innerText = '¥' + masterCombinedData.totalAmount.toLocaleString();
+      operationScreen.classList.add('hidden');
+      payoutScreen.classList.remove('hidden');
     });
 
-    payoutDoneBtn.addEventListener('click', () => {
-      resetUI();
-      payoutScreen.classList.add('hidden');
-      operationScreen.classList.remove('hidden');
+    // 💾 【変更点】「次の人のレシートへ進む（保存確定）」ボタンを押したタイミングで通信（DB書き込み）を開始
+    payoutDoneBtn.addEventListener('click', async () => {
+      payoutDoneBtn.disabled = true;
+      payoutDoneBtn.innerText = 'データを完全に保存中...';
+      
+      try {
+        // ここで初めてGASへデータを一括送信して保存する
+        const res = await callGas('saveBulk', { data: masterCombinedData });
+        if(res.success) { 
+          // 保存成功したら、初期化してメイン画面へ戻る
+          resetUI();
+          payoutScreen.classList.add('hidden');
+          operationScreen.classList.remove('hidden');
+          updateSummary(); // 履歴を最新にする
+        } else { 
+          // 万が一エラーになっても、まだ画面にデータが残っているので安全にリトライできます
+          alert('データベース保存エラー:\n' + res.error + '\nもう一度お試しください。'); 
+        }
+      } catch (err) { 
+        alert('通信に失敗しました。もう一度保存ボタンを押してください: ' + err.message);
+      } finally {
+        payoutDoneBtn.disabled = false;
+        payoutDoneBtn.innerText = '💰 現金を渡して、データをDBに保存';
+      }
     });
 
     document.getElementById('cancel-btn').addEventListener('click', () => { 
@@ -459,7 +457,7 @@
       duplicateWarning.classList.add('hidden');
       document.getElementById('combined-list-area').classList.add('hidden');
       saveBtn.disabled = false; 
-      saveBtn.innerText = '💰 合算金額を確定して保存する';
+      saveBtn.innerText = '💰 金額を確認して精算画面へ進む';
       if(isEditing) editToggleBtn.click();
       
       masterCombinedData = {
@@ -482,7 +480,6 @@
       resetUI(); 
     }
 
-    // 📊 【アップデート】履歴描画処理のカード型・巨大文字化
     async function updateSummary() {
       try {
         const today = new Date();
